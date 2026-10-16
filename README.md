@@ -1,0 +1,156 @@
+# NetTorrent
+
+A modern, cross-platform download manager for **Windows PC and Android**, built as a Computer Networks university project. NetTorrent downloads files over **HTTP/HTTPS** (with pause/resume via `Range` requests, queues, priorities and bandwidth caps) and over **BitTorrent** (`.torrent` files and magnet links via a real pure-Dart engine), with a live network monitor, a browser-extension bridge, persistent settings, and completion notifications — all in one Flutter codebase.
+
+## Features
+
+- **HTTP/HTTPS downloads** — paste a URL, stream to disk, pause/resume when the server supports `Range`, cancel, retry with backoff, download history.
+- **Queues & priorities** — configurable max simultaneous downloads; low/normal/high task priorities order the queue.
+- **Speed caps** — global download/upload bandwidth limits enforced with a token bucket.
+- **BitTorrent** — add `.torrent` files or magnet links via `dtorrent_task_v2` (tracker + DHT + uTP/TCP); shows peers, seeders, up/down speeds, tracker status; pause/resume/remove; optional seeding after completion.
+- **Network monitor** — live throughput graphs, active connections, peer endpoints, tracker status, interface info, plus plain-language explainers of client-server, P2P, TCP/UDP, HTTP(S), bandwidth and hashing concepts.
+- **Browser extension bridge** — Manifest-V3 extension for Chromium browsers POSTs URLs to a localhost bridge (`127.0.0.1:17846`, per-install bearer token) so supported links can be sent straight to the app.
+- **Android integration** — "Share → NetTorrent" intent support, `.torrent`/magnet association, scoped-storage-aware download folders.
+- **Settings & persistence** — theme (dark/light/system), download folder, limits, retry policy, seeding preferences; tasks and settings survive restarts.
+- **Notifications** — completion and failure alerts on both platforms.
+- **No simulated data** — every speed/progress figure on screen comes from a real engine sampler; anything unavailable is labelled as such.
+
+## Tech stack
+
+| Concern | Choice |
+|---|---|
+| UI framework | Flutter 3.x / Dart 3 (Windows + Android from one codebase) |
+| State management | flutter_riverpod 2.x |
+| HTTP(S) downloads | dio 5.x (`ResponseType.stream`, `Range` resume) |
+| BitTorrent engine | dtorrent_task_v2 0.5.4 (pure Dart: tracker, DHT, uTP/TCP) |
+| Magnet metadata assembly | b_encode_decode |
+| Settings persistence | shared_preferences |
+| Task persistence | JSON file in the app support directory |
+| Charts | fl_chart |
+| Notifications | flutter_local_notifications 17.x |
+| File picking | file_picker 8.x |
+| Android share intents | receive_sharing_intent 1.8.x |
+| Permissions | permission_handler 11.x |
+| Network info | network_info_plus 6.x |
+| Browser bridge | shelf + shelf_router (localhost HTTP server) |
+| Tests | flutter_test |
+
+Full rationale and the system diagram live in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Quick start
+
+**Prerequisites**
+
+- Flutter 3.x SDK (with Dart 3) installed and on your `PATH` (`flutter doctor` should be clean).
+- Windows: Visual Studio with the **"Desktop development with C++"** workload.
+- Android: Android Studio / Android SDK with a device or emulator attached.
+
+```bash
+git clone <repo-url>
+cd nettorrent
+flutter pub get
+flutter run -d windows        # or: flutter run -d <android-device-id>
+```
+
+The app starts on the Dashboard. Paste a direct `http(s)` URL via **Add Download**, or pick a `.torrent` file / paste a magnet link on the **Torrents** page.
+
+## Build
+
+```bash
+flutter build windows --release   # → build/windows/x64/runner/Release/nettorrent.exe
+flutter build apk --release       # → build/app/outputs/flutter-apk/app-release.apk
+```
+
+Step-by-step platform notes (signing, MSVC setup, Android SDK quirks) are in `docs/BUILD.md` (planned).
+
+## Project structure
+
+```
+nettorrent/
+├── pubspec.yaml
+├── analysis_options.yaml
+├── README.md
+├── lib/
+│   ├── main.dart                  # bootstrap, providers, theme wiring
+│   ├── core/
+│   │   ├── constants.dart         # ports, timeouts, defaults
+│   │   ├── theme.dart             # dark/light Material 3 themes
+│   │   └── utils.dart             # URL validation, filename sanitising, formatters
+│   ├── models/
+│   │   ├── download_task.dart     # DownloadTask (immutable, JSON)
+│   │   └── app_settings.dart      # AppSettings (persisted)
+│   ├── services/
+│   │   ├── settings_service.dart
+│   │   ├── http_download_engine.dart
+│   │   ├── torrent_service.dart
+│   │   ├── download_manager.dart  # queue, priorities, retry, persistence, providers
+│   │   ├── network_stats.dart
+│   │   ├── bridge_server.dart     # localhost bridge for the browser extension
+│   │   └── notifications_service.dart
+│   └── ui/                        # pages + widgets (Phase 2)
+├── test/
+│   ├── utils_test.dart
+│   └── models_test.dart
+├── browser-extension/             # Manifest V3 extension (Phase 6)
+├── android/                       # generated by `flutter create`
+├── windows/                       # generated by `flutter create`
+└── docs/
+    ├── ARCHITECTURE.md            # stack, architecture, phase plan
+    ├── TEST_PLAN.md               # test matrix: automated vs manual
+    └── TROUBLESHOOTING.md         # symptom → cause → fix
+```
+
+## Docs
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — technology choices, system diagram, module responsibilities, honesty ledger (what is real vs. stubbed), risks and phase plan.
+- [docs/TEST_PLAN.md](docs/TEST_PLAN.md) — full test matrix: which requirements are covered by `flutter test`, which need manual verification, steps and expected results.
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — common failures and fixes (bridge auth, resume quirks, torrent stalls, Android storage, build errors).
+
+## Testing
+
+```bash
+flutter test            # run the whole unit test suite
+flutter test test/utils_test.dart   # single file
+flutter analyze         # static analysis (flutter_lints)
+```
+
+Tests cover the pure logic in `lib/core/utils.dart` (URL/magnet validation, filename sanitising, formatters) and the models (`DownloadTask` JSON round-trip, `copyWith`, progress/queue maths; `AppSettings` defaults and persistence). Engine, bridge and UI behaviour are covered by the manual checklist in [docs/TEST_PLAN.md](docs/TEST_PLAN.md).
+
+> **Status of test runs:** the test files are written against the current source but have **not** been executed in this build environment (no Flutter SDK installed here) — run `flutter test` on a development machine before citing results. See the PENDING rows in the test plan.
+
+## License
+
+The NetTorrent project code is released under the **MIT License**:
+
+> Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+>
+> The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+>
+> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+**Third-party dependencies** (licenses as published on pub.dev — confirm against the pub cache after `flutter pub get`):
+
+| Package | License |
+|---|---|
+| flutter_riverpod | MIT |
+| dio | MIT |
+| dtorrent_task_v2 | per pub.dev |
+| b_encode_decode | per pub.dev |
+| shared_preferences, path_provider, network_info_plus | BSD-3-Clause |
+| file_picker, permission_handler, receive_sharing_intent, fl_chart, uuid | MIT |
+| flutter_local_notifications, shelf, shelf_router, intl | BSD-3-Clause |
+
+Only download content you are authorised to download. NetTorrent ships no content catalogs and must not be used to bypass paywalls, authentication, or access restrictions.
+
+## Current status
+
+| Phase | State |
+|---|---|
+| 1 — Architecture, stack, structure, plan | Done ([docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)) |
+| 2 — UI shell + 9 pages navigation | In progress |
+| 3 — HTTP engine + manager + queue + persistence | Core done; UI wiring in Phase 2 |
+| 4 — BitTorrent integration hardening | Engine wrapper done; torrent page in Phase 2 |
+| 5 — Network stats + monitor page | Service done; page in Phase 2 |
+| 6 — Platform integrations + browser extension | Pending |
+| 7 — Tests + fixes + limitations | Pending (unit tests written, not yet run) |
+| 8 — Academic report, diagrams, presentation | Pending |

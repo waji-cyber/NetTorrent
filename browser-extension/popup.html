@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>NetTorrent Companion</title>
+  <style>
+    :root {
+      --bg: #121417;
+      --card: #1b1e24;
+      --text: #e8eaed;
+      --muted: #9aa0a6;
+      --accent: #4da3ff;
+      --ok: #4caf50;
+      --err: #f44336;
+      --border: #2c313a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      width: 320px;
+      margin: 0;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 13px;
+    }
+    h1 {
+      font-size: 15px;
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h1 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+    .status {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      color: var(--muted);
+    }
+    .status.ok { color: var(--ok); border-color: var(--ok); }
+    .status.bad { color: var(--err); border-color: var(--err); }
+    label { display: block; margin: 10px 0 4px; color: var(--muted); font-size: 12px; }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 13px;
+    }
+    input:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+    button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #0b0d10;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button:hover { filter: brightness(1.1); }
+    button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      margin-top: 8px;
+    }
+    #msg { margin-top: 10px; min-height: 18px; font-size: 12px; }
+    #msg.ok { color: var(--ok); }
+    #msg.err { color: var(--err); }
+    .hint { margin-top: 12px; font-size: 11px; color: var(--muted); line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <h1><span class="dot"></span>NetTorrent Companion</h1>
+
+  <div id="status" class="status">Checking…</div>
+
+  <label for="token">Bridge token (from NetTorrent → Settings)</label>
+  <input type="password" id="token" placeholder="Paste token once" autocomplete="off" spellcheck="false">
+
+  <label for="url">Download URL</label>
+  <input type="text" id="url" placeholder="https://example.com/file.zip" spellcheck="false">
+
+  <button id="send">Send to NetTorrent</button>
+  <button id="refresh" class="secondary">Refresh status</button>
+
+  <div id="msg"></div>
+
+  <p class="hint">
+    The token is stored only in this browser and is sent only to
+    NetTorrent on your own machine (127.0.0.1). The extension never
+    reads browsing history or cookies.
+  </p>
+
+  <script src="popup.js"></script>
+</body>
+</html>

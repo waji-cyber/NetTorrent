@@ -1,0 +1,52 @@
+name: nettorrent
+description: NetTorrent - a cross-platform download manager (HTTP/HTTPS + BitTorrent) for Windows and Android. Computer Networks university project.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.4.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- State management ---
+  flutter_riverpod: ^2.5.1
+
+  # --- HTTP downloads (streaming, Range resume) ---
+  dio: ^5.4.3
+
+  # --- BitTorrent engine (pure Dart: tracker + DHT + uTP/TCP, .torrent + magnet) ---
+  dtorrent_task_v2: ^0.5.4
+  # bencode decoder used to assemble a TorrentModel from magnet metadata
+  b_encode_decode: ^1.0.5
+
+  # --- Persistence ---
+  shared_preferences: ^2.2.3
+  path_provider: ^2.1.2
+
+  # --- Platform integrations ---
+  file_picker: ^8.0.0
+  flutter_local_notifications: ^17.2.1
+  permission_handler: ^11.3.0
+  receive_sharing_intent: ^1.8.0
+  network_info_plus: ^6.0.0
+
+  # --- UI ---
+  fl_chart: ^0.68.0
+
+  # --- Local bridge server (for the browser extension) ---
+  shelf: ^1.4.1
+  shelf_router: ^1.1.4
+
+  # --- Utilities ---
+  uuid: ^4.4.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,45 @@
+# Builds the NetTorrent Windows desktop app on GitHub's servers.
+#
+# You do NOT need the Flutter SDK or Visual Studio on your own PC.
+# Steps: push this repo to GitHub -> Actions tab -> run this workflow ->
+# download the "NetTorrent-windows-x64" artifact (a zip containing the .exe).
+name: Build NetTorrent (Windows)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate Windows platform files
+        run: |
+          flutter create --platforms=windows --org com.nettorrent .
+          rm -f test/widget_test.dart
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Upload Windows app
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetTorrent-windows-x64
+          path: build/windows/x64/runner/Release/
