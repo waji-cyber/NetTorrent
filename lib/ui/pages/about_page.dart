@@ -116,7 +116,6 @@ class AboutPage extends StatelessWidget {
                 package: 'flutter_local_notifications',
                 licence: 'BSD-3-Clause',
               ),
-              _LicenceRow(package: 'permission_handler', licence: 'MIT'),
               _LicenceRow(package: 'network_info_plus', licence: 'BSD-3-Clause'),
             ],
           ),

@@ -33,19 +33,20 @@ jobs:
           rm -f test/widget_test.dart
 
       - name: Enable core library desugaring
-        # flutter_local_notifications requires desugaring; flutter create
-        # regenerates build.gradle.kts, so patch it every run.
+        # flutter_local_notifications requires desugaring; flutter create may
+        # regenerate build.gradle.kts, so (re-)apply idempotently every run.
         run: |
           python3 - <<'EOF'
           p = "android/app/build.gradle.kts"
           s = open(p).read()
-          anchor = "targetCompatibility = JavaVersion.VERSION_17\n    }"
-          assert anchor in s, "compileOptions block not found"
-          s = s.replace(anchor, anchor.replace("    }", "        isCoreLibraryDesugaringEnabled = true\n    }"))
+          if "isCoreLibraryDesugaringEnabled" not in s:
+              anchor = "targetCompatibility = JavaVersion.VERSION_17\n    }"
+              assert anchor in s, "compileOptions block not found"
+              s = s.replace(anchor, anchor.replace("    }", "        isCoreLibraryDesugaringEnabled = true\n    }"))
           if "coreLibraryDesugaring" not in s:
               s += '\ndependencies {\n    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n}\n'
           open(p, "w").write(s)
-          print("desugaring patched")
+          print("desugaring ok")
           EOF
 
       - name: Install dependencies
