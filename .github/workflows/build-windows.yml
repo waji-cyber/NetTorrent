@@ -22,6 +22,8 @@ jobs:
           cache: true
 
       - name: Generate Windows platform files
+        # Git Bash: the default PowerShell shell cannot run `rm -f`.
+        shell: bash
         run: |
           flutter create --platforms=windows --org com.nettorrent .
           rm -f test/widget_test.dart
