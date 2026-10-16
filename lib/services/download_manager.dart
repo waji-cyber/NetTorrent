@@ -701,8 +701,10 @@ class DownloadManager extends StateNotifier<List<DownloadTask>> {
   }
 
   void _emit(DownloadTask updated, {bool persist = true}) {
+    final exists = state.any((t) => t.id == updated.id);
     state = [
       for (final t in state) t.id == updated.id ? updated : t,
+      if (!exists) updated,
     ];
     if (persist) _persist();
   }
