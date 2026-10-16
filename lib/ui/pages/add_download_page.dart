@@ -32,7 +32,11 @@ class _AddDownloadPageState extends ConsumerState<AddDownloadPage> {
   bool get _urlValid => isValidDownloadUrl(_urlCtrl.text);
   bool get _magnetValid => isValidMagnetUri(_magnetCtrl.text);
 
-  void _goToAll() => ref.read(navIndexProvider.notifier).state = 1;
+  void _goToAll() {
+    // Clear any stale search text so the newly added download is visible.
+    ref.read(searchQueryProvider.notifier).state = '';
+    ref.read(navIndexProvider.notifier).state = 1;
+  }
 
   void _snack(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
